@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<mysqldump xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<database name="xchg">
+	<table_structure name="ITEMS">
+		<field Field="fand_row" Type="int(10) unsigned" Null="" Key="PRI" Extra="" Comment="the record's place in the FAND file" />
+		<field Field="Code" Type="varchar(6)" Null="YES" Key="" Extra="" Comment="FAND A,6" />
+		<field Field="Name" Type="varchar(30)" Null="YES" Key="" Extra="" Comment="FAND A,30" />
+		<field Field="Cust" Type="varchar(10)" Null="YES" Key="" Extra="" Comment="FAND A,10R" />
+		<field Field="Qty" Type="varchar(5)" Null="YES" Key="" Extra="" Comment="FAND N,5" />
+		<field Field="Serial" Type="varchar(6)" Null="YES" Key="" Extra="" Comment="FAND N,6L" />
+		<field Field="Price" Type="decimal(12,2)" Null="YES" Key="" Extra="" Comment="FAND F,9.2" />
+		<field Field="Units" Type="decimal(7,0)" Null="YES" Key="" Extra="" Comment="FAND F,6" />
+		<field Field="Cents" Type="decimal(10,2)" Null="YES" Key="" Extra="" Comment="FAND F,7,2" />
+		<field Field="Rate" Type="double" Null="YES" Key="" Extra="" Comment="FAND R" />
+		<field Field="Due" Type="date" Null="YES" Key="" Extra="" Comment="FAND D,'DD.MM.YYYY'" />
+		<field Field="Stamp" Type="datetime" Null="YES" Key="" Extra="" Comment="FAND D,'DD.MM.YYYY hh:mm:ss'" />
+		<field Field="Clock" Type="time(2)" Null="YES" Key="" Extra="" Comment="FAND D,'hh:mm:ss.tt'" />
+		<field Field="Paid" Type="tinyint(1)" Null="YES" Key="" Extra="" Comment="FAND B" />
+		<field Field="Note" Type="mediumtext" Null="YES" Key="" Extra="" Comment="FAND T" />
+		<key Table="ITEMS" Non_unique="0" Key_name="PRIMARY" Seq_in_index="1" Column_name="fand_row" Collation="A" Cardinality="3" Sub_part="" Packed="" Null="" Index_type="BTREE" Comment="" Index_comment="" />
+		<key Table="ITEMS" Non_unique="0" Key_name="key1" Seq_in_index="1" Column_name="Code" Collation="A" Cardinality="3" Sub_part="" Packed="" Null="YES" Index_type="BTREE" Comment="" Index_comment="" />
+		<options Name="ITEMS" Rows="3" Comment="FAND file type X" />
+	</table_structure>
+	<table_data name="ITEMS">
+	<row>
+		<field name="fand_row">1</field>
+		<field name="Code">C3</field>
+		<field name="Name">Ďábelské ódy - &quot;uvozovky&quot;</field>
+		<field name="Cust">X</field>
+		<field name="Qty">99999</field>
+		<field name="Serial">999999</field>
+		<field name="Price">999999999.99</field>
+		<field name="Units">-999999</field>
+		<field name="Cents">-99999.99</field>
+		<field name="Rate">1.5E20</field>
+		<field name="Due">1999-12-31</field>
+		<field name="Stamp">2000-02-29 23:59:59</field>
+		<field name="Clock">23:59:59.99</field>
+		<field name="Paid">1</field>
+		<field name="Note">ASCII only</field>
+	</row>
+	<row>
+		<field name="fand_row">2</field>
+		<field name="Code">A1</field>
+		<field name="Name">Žluťoučký kůň úpěl</field>
+		<field name="Cust">ACME</field>
+		<field name="Qty">00042</field>
+		<field name="Serial">120000</field>
+		<field name="Price">1234.50</field>
+		<field name="Units">7</field>
+		<field name="Cents">12.34</field>
+		<field name="Rate">3.14159265359</field>
+		<field name="Due">2026-09-24</field>
+		<field name="Stamp">2026-09-24 13:45:07</field>
+		<field name="Clock">08:30:15.25</field>
+		<field name="Paid">1</field>
+		<field name="Note">Line one&#13;
+Line two ␂bold␂ &amp; &lt;tag&gt; &quot;quoted&quot;&#13;
+	tab</field>
+	</row>
+	<row>
+		<field name="fand_row">3</field>
+		<field name="Code">B2</field>
+		<field name="Name"></field>
+		<field name="Cust"></field>
+		<field name="Qty" xsi:nil="true" />
+		<field name="Serial">700000</field>
+		<field name="Price" xsi:nil="true" />
+		<field name="Units" xsi:nil="true" />
+		<field name="Cents">-0.05</field>
+		<field name="Rate" xsi:nil="true" />
+		<field name="Due" xsi:nil="true" />
+		<field name="Stamp" xsi:nil="true" />
+		<field name="Clock">00:00:00.00</field>
+		<field name="Paid">0</field>
+		<field name="Note"></field>
+	</row>
+	</table_data>
+	<table_structure name="NOTES">
+		<field Field="fand_row" Type="int(10) unsigned" Null="" Key="PRI" Extra="" Comment="the record's place in the FAND file" />
+		<field Field="Title" Type="varchar(40)" Null="YES" Key="" Extra="" Comment="FAND A,40" />
+		<field Field="Body" Type="mediumtext" Null="YES" Key="" Extra="" Comment="FAND T" />
+		<key Table="NOTES" Non_unique="0" Key_name="PRIMARY" Seq_in_index="1" Column_name="fand_row" Collation="A" Cardinality="2" Sub_part="" Packed="" Null="" Index_type="BTREE" Comment="" Index_comment="" />
+		<options Name="NOTES" Rows="2" Comment="FAND file type 6" />
+	</table_structure>
+	<table_data name="NOTES">
+	<row>
+		<field name="fand_row">1</field>
+		<field name="Title">Hello</field>
+		<field name="Body">first line&#13;
+second line</field>
+	</row>
+	<row>
+		<field name="fand_row">2</field>
+		<field name="Title">it's</field>
+		<field name="Body"></field>
+	</row>
+	</table_data>
+</database>
+</mysqldump>

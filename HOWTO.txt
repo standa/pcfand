@@ -75,6 +75,9 @@ Batch operations
 
     fand TASK --source-in DIR     (re)create the task's chapters from DIR
     fand TASK --source-out DIR    write the chapters into DIR
+    fand TASK --export FILE       every record of the task, as XML
+    fand TASK --export-sql FILE   the same, as SQL for MariaDB / MySQL
+    fand TASK --import FILE       replace records from such an XML dump
 
 Nothing is painted, a key wait is answered Esc, a yes/no question No, and
 messages go to stderr. Exit code 0 is success, 1 failure, 2 warnings.
@@ -83,6 +86,54 @@ Chapters are files NNN-T-Name.txt (order, type, name), UTF-8 with LF;
 the RDB keeps CP852 with CR LF. --source-in compiles what it stored and
 reports the first error by chapter, line and column. A task whose chapters
 are password-protected is refused both ways.
+
+
+Exchanging data
+---------------
+
+--export writes MariaDB's XML dump format (mariadb-dump --xml), --import
+reads it back, from this export or from mariadb-dump --xml of a database
+loaded with --export-sql:
+
+    fand task --export-sql task.sql
+    mariadb -e 'CREATE DATABASE task' && mariadb task < task.sql
+    mariadb-dump --xml task > task.xml && fand task --import task.xml
+
+Round trips are exact, also through MariaDB.
+
+  * The dump has every file of the top RDB and of each sub-RDB the
+    catalogue leads to (rows RdbName=parent, FileName=child), a sub-RDB's
+    as RDB__FILE; a data file declared twice is written once. Chapter files
+    declared as data, directory-only catalogue paths and files no RDB
+    declares are left out, each with a line saying so.
+  * Each table starts with fand_row, the record's place in its file (the
+    SQL primary key); the import restores that order.
+  * NULL (xsi:nil) is not the empty string: an empty F, R, D or N field is
+    NULL. A and T have no NULL; a NULL imports as empty text.
+  * Text is UTF-8 in the dump. A character CP852 lacks imports as its
+    nearest ASCII, with a warning. T keeps CR LF; FAND's print control
+    characters travel as the control pictures U+2400-U+241F in XML.
+
+  A,n  varchar(n)      trailing blanks dropped (A,nR: leading)
+  N,n  varchar(n)      digits as stored; N,nL pads with zeros on the right
+  F    decimal(p,m)    p from the field's bytes: FAND checks the declared
+                       width on input only
+  R    double          the fewest digits that read back the same 6-byte real
+  D    date, datetime, time[(2)] or double, from the mask; datetime when a
+                       date field holds times; rounded to what the mask shows
+  B    tinyint(1)      the import also takes true, A, Y, T, ANO, YES
+  T    mediumtext
+
+Keys become non-unique indexes (FAND's ~ comparison ignores case and
+accents); keys on computed fields are left out, over-long ones index a
+prefix. An import replaces the records of each file the dump has data for,
+matching fields by name and reporting unknown ones; indexes are rebuilt on
+next open. It refuses a file the catalogue places outside the task directory
+(and $FANDDATA) - a copied task still names the original's files until it
+relocates itself - unless FAND_IMPORT_OUTSIDE=1. Values that do not fit are
+stored as far as they go and reported.
+
+tests/xchg/run.sh [path/to/fand] checks all of this.
 
 
 Extending the runtime for a task

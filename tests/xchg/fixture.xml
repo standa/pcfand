@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<!-- every field type, NULL and empty, CR LF, a control character, non-CP852 text,
+     rows out of fand_row order, an unknown field and an unknown file -->
+<mysqldump xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<database name="xchg">
+	<table_data name="ITEMS">
+	<row>
+		<field name="fand_row">2</field>
+		<field name="Code">A1</field>
+		<field name="Name">Žluťoučký kůň úpěl</field>
+		<field name="Cust">ACME</field>
+		<field name="Qty">42</field>
+		<field name="Serial">12</field>
+		<field name="Price">1234.50</field>
+		<field name="Units">7</field>
+		<field name="Cents">12.34</field>
+		<field name="Rate">3.14159265358979</field>
+		<field name="Due">2026-09-24</field>
+		<field name="Stamp">2026-09-24 13:45:07</field>
+		<field name="Clock">08:30:15.25</field>
+		<field name="Paid">1</field>
+		<field name="Note">Line one&#13;
+Line two ␂bold␂ &amp; &lt;tag&gt; "quoted"&#13;
+	tab</field>
+	</row>
+	<row>
+		<field name="fand_row">3</field>
+		<field name="Code">B2</field>
+		<field name="Name"></field>
+		<field name="Cust" xsi:nil="true" />
+		<field name="Qty" xsi:nil="true" />
+		<field name="Serial">7</field>
+		<field name="Price" xsi:nil="true" />
+		<field name="Units" xsi:nil="true" />
+		<field name="Cents">-0.05</field>
+		<field name="Rate" xsi:nil="true" />
+		<field name="Due" xsi:nil="true" />
+		<field name="Stamp" xsi:nil="true" />
+		<field name="Clock">00:00:00.00</field>
+		<field name="Paid">0</field>
+		<field name="Note"></field>
+	</row>
+	<row>
+		<field name="fand_row">1</field>
+		<field name="Code">C3</field>
+		<field name="Name">Ďábelské ódy – “uvozovky”</field>
+		<field name="Cust">X</field>
+		<field name="Qty">99999</field>
+		<field name="Serial">999999</field>
+		<field name="Price">999999999.99</field>
+		<field name="Units">-999999</field>
+		<field name="Cents">-99999.99</field>
+		<field name="Rate">1.5E20</field>
+		<field name="Due">1999-12-31</field>
+		<field name="Stamp">2000-02-29 23:59:59</field>
+		<field name="Clock">23:59:59.99</field>
+		<field name="Paid">1</field>
+		<field name="Note">ASCII only</field>
+	</row>
+	</table_data>
+	<table_data name="NOTES">
+	<row>
+		<field name="Title">Hello</field>
+		<field name="Body">first line&#13;
+second line</field>
+	</row>
+	<row>
+		<field name="Title">it's</field>
+		<field name="Colour">red</field>
+		<field name="Body" xsi:nil="true" />
+	</row>
+	</table_data>
+	<table_data name="GONE">
+	<row>
+		<field name="X">1</field>
+	</row>
+	</table_data>
+</database>
+</mysqldump>

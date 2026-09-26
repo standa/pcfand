@@ -36,7 +36,9 @@ Ukázkové úlohy `examples/hello` (menu Hello > World a About) a
 `examples/invoices` (malá fakturace se všemi typy kapitol) jsou uloženy
 jako zdrojové texty kapitol, `tools/build.sh` z nich sestaví RDB. Bez
 uživatelského rozhraní umí `fand` úlohu sestavit ze zdrojových textů
-(`--source-in`) a zapsat je zpět (`--source-out`).
+(`--source-in`), zapsat je zpět (`--source-out`) a vyvézt či dovézt všechna
+data úlohy ve formátu XML výpisu MariaDB (`--export`, `--import`) nebo je
+vyvézt jako SQL pro MariaDB / MySQL (`--export-sql`).
 
 ## Licence
 

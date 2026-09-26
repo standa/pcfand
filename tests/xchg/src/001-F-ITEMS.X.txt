@@ -1,0 +1,5 @@
+{ every stored field type, and a key }
+Code:A,6; Name:A,30; Cust:A,10R; Qty:N,5; Serial:N,6L; Price:F,9.2; Units:F,6.0;
+Cents:F,7,2; Rate:R; Due:D,'DD.MM.YYYY'; Stamp:D,'DD.MM.YYYY hh:mm:ss';
+Clock:D,'hh:mm:ss.tt'; Paid:B; Note:T;
+#K @ ~Code;
