@@ -26,6 +26,14 @@ Z důvodu úpravy práce s HEAPem (shora a zezdola stack, uprostřed heap), vyu�
 
 * V adresáři `/PAS/Mb160` je nezveřejněná úprava, která zvyšuje limit fyzické velikosti sdíleného datového souboru `.000` nad 160 MB.
 
+## Nápověda
+
+Nápověda programátorské verze PC FANDu 4.2 (`help/FANDHLP`) je převedená
+pro čtení v [docs/help](docs/help/README.md).
+Nápověda uživatelské verze (`help/UFANDHLP`) je v
+[docs/help-user](docs/help-user/README.md), anglická (`help/angl/UFANDHLP`)
+v [docs/help-user-en](docs/help-user-en/README.md).
+
 ## Licence
 
 PC FAND je uvolněn pod MIT licencí.
