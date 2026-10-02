@@ -291,6 +291,11 @@ procedure RdWrCache(ReadOp:boolean;Handle:word;NotCached:boolean;Pos:longint;
 
 
 procedure DeleteFile(path:PathStr);
+{$ifdef FPC}function ExistsH(const Path:string):boolean;
+function IsMdbH(h:word):boolean;
+function RelockH(Handle:word;OldPos:longint;OldLen:word;NewPos:longint;NewLen:word;
+  const Check:array of word):boolean;
+procedure UntrustH(const H:array of word);{$endif}
 procedure RenameFile56(OldPath,NewPath:PathStr;Msg:boolean);
 
 function MyFExpand(Nm:String12;EnvName:String8):PathStr;
@@ -490,7 +495,7 @@ uses obase,obaseww,oaccess,
      access  {SetCPathForH,StoreInTWork,ReadDelINTWork,SQLDisconnect}
 {$ifdef FandSQL}  ,channel  {$endif}  {SQLDisconnect}
 {$ifdef UNIX}    ,Unix  {$endif}
-{$ifdef FPC}    ,fanddos {$endif}
+{$ifdef FPC}    ,fanddos,fandmdb {$endif}
      ,runfand;
 
 

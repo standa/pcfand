@@ -298,6 +298,7 @@ begin
   dosLine := shellCmd;
   SaveCache(0);
   CallCloseFandFiles(false);
+  MdbFlush;                            { a program run may be another session }
   FandDosShell := TShellRun(@FandShellRun);
   FandDosPathMap := TPathMap(@DosPathMap);
   GetDir(0,dir0);                      { a CD in the command lasts until its end }

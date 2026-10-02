@@ -40,17 +40,38 @@ end;
 function ChangeLMode(Mode:LockMode;Kind:word;RdPref:boolean):boolean;
 var
   pos,oldpos:longint; h,len,oldlen,count,d:word; w,w1:longint; oldmode:LockMode;
-label 1,2;
+  {$ifdef FPC} x,t,m:word; {$endif}
+label 1,2,3;
 begin
   if not CFile^.IsShared then begin         {neu!!}
     ChangeLMode:=true; CFile^.LMode:=Mode; exit end;
   ChangeLMode:=false; oldmode:=CFile^.LMode; h:=CFile^.Handle;
   if oldmode>=WrMode then begin
     if Mode<WrMode then WrPrefixes;
-    if oldmode=ExclMode then begin SaveCache(0); ClearCacheCFile end;
+    if oldmode=ExclMode then begin SaveCache(0); ClearCacheCFile end
+    {$ifdef FPC} else if (Mode<WrMode) and IsMdbH(h) then SaveCache(0) {$endif};
     if Mode<WrMode then ResetCFileUpdH end;
+{$ifdef FPC}
+  { the cache stays: RelockH checks it when the file is read again }
+  if (oldmode>=RdMode) and (Mode<RdMode) and IsMdbH(h) then begin
+    SaveCache(0); with CFile^ do begin
+      x:=$FF; t:=$FF; if Typ='X' then x:=XF^.Handle; if TF<>nil then t:=TF^.Handle end;
+    UntrustH([h,x,t]) end;
+{$endif}
   w:=0; count:=0;
-1:if Mode<>NullMode then
+1:{$ifdef FPC}
+  { MariaDB: the server swaps the ranges in one step, no transition lock }
+  if IsMdbH(h) then begin
+    oldpos:=0; oldlen:=0; pos:=0; len:=0;
+    if oldmode<>NullMode then ModeLockBnds(oldmode,oldpos,oldlen);
+    if Mode<>NullMode then ModeLockBnds(Mode,pos,len);
+    x:=$FF; t:=$FF; m:=$FF;
+    if (oldmode<RdMode) and (Mode>=RdMode) then begin
+      x:=h; if CFile^.Typ='X' then t:=CFile^.XF^.Handle;
+      if CFile^.TF<>nil then m:=CFile^.TF^.Handle end;
+    if RelockH(h,oldpos,oldlen,pos,len,[x,t,m]) then goto 3 else goto 2 end;
+{$endif}
+  if Mode<>NullMode then
     if not TryLockH(h,TransLock,1) then begin
 2:    if Kind=2 then exit; {Kind: 0-wait, 1-wait until ESC, 2-no wait}
       inc(count);
@@ -67,7 +88,7 @@ begin
       if oldmode<>NullMode then TryLockH(h,oldpos,oldlen);
       UnLockH(h,TransLock,1); goto 2 end;
     UnLockH(h,TransLock,1) end;
-  if w<>0 then PopW(w);
+3:if w<>0 then PopW(w);
   CFile^.LMode:=Mode;
   if (oldmode<RdMode) and (Mode>=RdMode) and RdPref then RdPrefixes;
   ChangeLMode:=true;
@@ -489,7 +510,10 @@ begin IsShared:=(UMode=Shared) or (UMode=RdShared) end;
 
 {$ifdef FPC}
 function FileD.NotCached:boolean;
-begin NotCached:=((UMode=Shared) or (UMode=RdShared)) and (LMode<>ExclMode) end;
+begin
+  NotCached:=((UMode=Shared) or (UMode=RdShared)) and (LMode<>ExclMode)
+    and not ((LMode>=RdMode) and IsMdbH(Handle));
+end;
 {$else}
 function FileD.NotCached:boolean; assembler;
 asm  les di,Self; xor ax,ax; mov dl,es:[di].FileD.UMode;

@@ -633,7 +633,7 @@ procedure ExportFile(FD:FileDPtr);
 var Scan:XScanPtr; md:LockMode; F:FieldDPtr; p:pointer; v:ansistring; nul,exists:boolean;
     n:longint;
 begin
-  CFile:=FD; SetCPathVol; exists:=FileExists(UnixPath(CPath));
+  CFile:=FD; SetCPathVol; exists:=ExistsH(CPath);
   Timed:=nil;
   n:=0; if exists then begin
     MarkStore(p); CFile:=FD; CRecPtr:=GetRecSpace; md:=NewLMode(RdMode);
@@ -1049,6 +1049,15 @@ begin
   RowAt:=nil; RowKey:=nil; XP:=Stop;
   ImportTable:=n;
 end;
+function HasRows(Stop:longint):boolean;
+var i:longint;
+begin
+  HasRows:=true; i:=PosFrom('<row',XP);
+  while (i>0) and (i<Stop) do begin
+    if X[i+4] in ['>','/',' ',#9,#10,#13] then exit;
+    i:=PosFrom('<row',i+4) end;
+  HasRows:=false;
+end;
 procedure ImportData(const Task,FileName:string);
 var nm,attrs,tbl:ansistring; sc:boolean; FD:FileDPtr;
     md:LockMode; p:pointer; rows,files,total,stop:longint;
@@ -1069,11 +1078,17 @@ begin
       FD:=TableFD(tbl);
       if FD=nil then Warn(tbl+': the task declares no such file; skipped')
       else if MayReplace(FD,tbl) then begin
+        { a file with no rows that is not there stays away: a shared file is
+          never deleted when it is closed empty }
+        CFile:=FD; SetCPathVol;
+        if not HasRows(stop) and not ExistsH(CPath) then
+          Say('  '+U(FD^.Name)+': no records, '+U(DataPath(FD))+' not created')
+        else begin
         MarkStore(p); CFile:=FD; CRecPtr:=GetRecSpace; md:=RewriteF(false);
         rows:=ImportTable(FD,tbl,stop);
         CFile:=FD; OldLMode(md); ClearRecSpace(CRecPtr); ReleaseStore(p);
         Say('  '+U(FD^.Name)+': '+IStr(rows)+' records to '+U(DataPath(FD)));
-        inc(files); inc(total,rows) end;
+        inc(files); inc(total,rows) end end;
       XP:=stop; if not sc then SkipPast('</table_data>') end;
   end;
   X:='';

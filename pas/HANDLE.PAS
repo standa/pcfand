@@ -38,7 +38,8 @@ procedure ClearFlshHandles;
 function IsNetCVol:boolean;
 begin
 {$ifdef FandNetV}
-  IsNetCVol:=(CVol='#') or (CVol='##') or SEquUpcase(CVol,'#R');
+  IsNetCVol:=(CVol='#') or (CVol='##') or SEquUpcase(CVol,'#R')
+    {$ifdef FPC} or MdbPath(UnixPath(CPath)) {$endif};
 {$else}
   IsNetCVol:=false;
 {$endif}
@@ -69,6 +70,7 @@ end;
 procedure HErr;
 begin HandleError:=DosErrH(SysUtils.GetLastOSError) end;
 var OsH:array[0..254] of THandle;
+    MdbH:set of 0..254;
 function NewH(h:THandle):word;
 var i:word;
 begin
@@ -79,7 +81,8 @@ function MoveH(dist:longint;method,handle:word):longint;
 var r:longint;
 begin
   HandleError:=0;
-  r:=longint(FileSeek(OsH[handle], dist, method));
+  if handle in MdbH then r:=MdbSeek(OsH[handle],dist,method)
+  else r:=longint(FileSeek(OsH[handle], dist, method));
   if r=-1 then HErr;
   MoveH:=r;
 end;
@@ -91,9 +94,9 @@ function FileSizeH(handle:word):longint;
 var pos:longint;
 begin pos:=PosH(handle);FileSizeH:=MoveH(0,2,handle);SeekH(handle,pos) end;
 function TryLockH(Handle:word;Pos:longint;Len:word):boolean;
-begin TryLockH:=true end;
+begin TryLockH:=not (Handle in MdbH) or MdbLock(OsH[Handle],Pos,Len) end;
 procedure UnLockH(Handle:word;Pos:longint;Len:word);
-begin end;
+begin if Handle in MdbH then MdbUnlock(OsH[Handle],Pos,Len) end;
 function UnixPath(const S:string):string;
 var i:integer; r,root,cwd:string;
 begin
@@ -159,6 +162,7 @@ var h:longint; path:PathStr;
     w:longint;
     flags:longint;
     s:string;
+    e:word; mdb:boolean;
 const Txt:array[FileUseMode]of string[4]=('Clos','OpRd','OpRs','OpSh','OpEx');
 label 1;
 begin
@@ -173,6 +177,8 @@ begin
     Exclusive:flags:=fmOpenReadWrite or fmShareExclusive;
   else        flags:=fmOpenReadWrite or fmShareDenyNone;
   end;
+  mdb:=MdbPath(path);
+  if mdb then begin h:=MdbOpen(path,ord(Mode),e); HandleError:=e end else
   { as in DOS, a file is created only where there is none: one that is
     there but cannot be opened (in use, no access) is never truncated }
   case Mode of
@@ -195,6 +201,7 @@ begin
   OpenH:=$FF;
   if HandleError=0 then begin
     h:=NewH(h); OpenH:=word(h); SetHandle(word(h));
+    if mdb then MdbH:=MdbH+[h] else MdbH:=MdbH-[h];
     if Mode<>_isoldfile then SetUpdHandle(word(h))
   end;
   if w<>0 then PopW(w);
@@ -204,7 +211,8 @@ var n:longint;
 begin
   if handle=$ff then RunError(706);
   HandleError:=0;
-  n:=FileRead(OsH[handle],buffer,bytes);
+  if handle in MdbH then n:=MdbRead(OsH[handle],buffer,bytes)
+  else n:=FileRead(OsH[handle],buffer,bytes);
   if n<0 then begin HErr; ReadH:=0 end
   else ReadH:=word(n);
 end;
@@ -219,7 +227,8 @@ var n:longint;
 begin
   if handle=$ff then RunError(706);
   HandleError:=0;
-  n:=FileWrite(OsH[handle],buffer,bytes);
+  if handle in MdbH then n:=MdbWrite(OsH[handle],buffer,bytes)
+  else n:=FileWrite(OsH[handle],buffer,bytes);
   SetUpdHandle(handle);
   if (n<0) or (word(n)<>bytes) then HErr;
 end;
@@ -233,7 +242,8 @@ procedure CloseH(handle:word);
 begin
   if handle=$FF then exit;
   HandleError:=0;
-  FileClose(OsH[handle]);
+  if handle in MdbH then begin MdbClose(OsH[handle]); MdbH:=MdbH-[handle] end
+  else FileClose(OsH[handle]);
   ResetHandle(handle); ResetUpdHandle(handle); ResetFlshHandle(handle);
 end;
 procedure FlushH(handle:word); begin if handle=$ff then exit; HandleError:=0 end;
@@ -246,7 +256,8 @@ begin
 end;
 procedure TruncH(handle:word;N:longint);
   begin if handle=$FF then exit; if FileSizeH(handle)>N then begin
-        SeekH(handle,N); FileTruncate(OsH[handle],N) end end;
+        SeekH(handle,N);
+        if handle in MdbH then MdbTrunc(OsH[handle],N) else FileTruncate(OsH[handle],N) end end;
 procedure CloseClearH(var h:word);
   begin if h=$FF then exit; CloseH(h); ClearCacheH(h); h:=$FF end;
 procedure SetFileAttr(Attr:word);
@@ -293,7 +304,8 @@ function GetDateTimeH(handle:word):longint;
 var dt:longint; y,mo,dy,h,mi,s:word;
 begin
   HandleError:=0;
-  dt:=SysUtils.FileGetDate(OsH[handle]);
+  if handle in MdbH then dt:=MdbDate(OsH[handle])
+  else dt:=SysUtils.FileGetDate(OsH[handle]);
   if dt<0 then begin HandleError:=1; GetDateTimeH:=0; exit end;
   FandFileTime(dt,y,mo,dy,h,mi,s);
   if y<1980 then begin y:=1980; mo:=1; dy:=1; h:=0; mi:=0; s:=0 end;
@@ -301,10 +313,31 @@ begin
                   (longint(dy) shl 16) or (longint(h) shl 11) or
                   (longint(mi) shl 5) or longint(s div 2);
 end;
+function IsMdbH(h:word):boolean;
+begin IsMdbH:=(h<>$FF) and (h in MdbH) end;
+function RelockH(Handle:word;OldPos:longint;OldLen:word;NewPos:longint;NewLen:word;
+  const Check:array of word):boolean;
+{ a MariaDB lock mode change; the caches of the Check handles another session changed are dropped }
+var f:array[0..7] of longint; stale:longword; i:integer;
+begin
+  for i:=0 to high(Check) do
+    if (Check[i]<>$FF) and (Check[i] in MdbH) then f[i]:=OsH[Check[i]] else f[i]:=-1;
+  RelockH:=MdbRelock(OsH[Handle],OldPos,OldLen,NewPos,NewLen,slice(f,length(Check)),stale);
+  for i:=0 to high(Check) do if stale and (longword(1) shl i)<>0 then ClearCacheH(Check[i]);
+end;
+procedure UntrustH(const H:array of word);
+var i:integer;
+begin for i:=0 to high(H) do if (H[i]<>$FF) and (H[i] in MdbH) then MdbUntrust(OsH[H[i]]) end;
+function ExistsH(const Path:string):boolean;
+var r:integer;
+begin
+  r:=MdbExists(UnixPath(Path));
+  if r<0 then ExistsH:=SysUtils.FileExists(UnixPath(Path)) else ExistsH:=r>0;
+end;
 procedure DeleteFile(path:PathStr);
 var p:string;
 begin
-  HandleError:=0; p:=UnixPath(path);
+  HandleError:=0; p:=UnixPath(path); if MdbDelete(p) then exit;
   if not SysUtils.DeleteFile(p) then begin
     p:=CaseVariant(p); if (p='') or not SysUtils.DeleteFile(p) then HandleError:=1 end;
 end;
@@ -312,8 +345,9 @@ procedure RenameFile56(OldPath,NewPath:PathStr;Msg:boolean);
 var p,q:string;
 begin
   HandleError:=0; p:=UnixPath(OldPath); q:=UnixPath(NewPath);
-  if not SysUtils.RenameFile(p,q) then begin
-    p:=CaseVariant(p); if (p='') or not SysUtils.RenameFile(p,q) then HandleError:=1 end;
+  if not MdbRename(p,q) then
+    if not SysUtils.RenameFile(p,q) then begin
+      p:=CaseVariant(p); if (p='') or not SysUtils.RenameFile(p,q) then HandleError:=1 end;
   if Msg and (HandleError<>0) then begin
     Set2MsgPar(OldPath,NewPath); RunError(829) end;
 end;

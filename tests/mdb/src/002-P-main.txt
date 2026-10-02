@@ -1,0 +1,7 @@
+{ adds 1 to the counter 2000 times, each under a write lock }
+var i:real;
+begin
+  for i:=1 to 2000 do
+    with shared COUNTER(Wr) do
+      COUNTER[1].Nr:=COUNTER[1].Nr+1;
+end;

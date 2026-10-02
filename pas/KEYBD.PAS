@@ -251,6 +251,7 @@ function KbdTimer(Delta:word;Kind:byte):boolean;
 var EndTime:longint; b:byte;
 label 1;
 begin
+  MdbFlush;                          { a lock wait: what this session gave up must be seen }
   EnsureRawTty;
   Timer := longint(SysUtils.GetTickCount64 div 55);
   EndTime := Timer+Delta; KbdTimer:=false;

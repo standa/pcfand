@@ -239,7 +239,7 @@ procedure AssignCrt(var T:text);
 
 implementation
 
-uses base,obaseww,wwmenu{$ifdef FPC},Crt,fandcp
+uses base,obaseww,wwmenu{$ifdef FPC},Crt,fandcp,fandmdb
      {$ifdef UNIX},BaseUnix,TermIO{$endif}
      {$ifdef MSWINDOWS},Windows{$endif}{$endif};
 
@@ -293,6 +293,7 @@ end;
 function PollStdinMs(ms:word):boolean;
 var fds: TFDSet; tv: TTimeVal; rc: longint;
 begin
+  if ms > 0 then MdbFlush;           { nothing held back while FAND waits }
   PollStdinMs := false; if FandBatch then exit;
   if StdinNext >= 0 then begin PollStdinMs := true; exit end;
   if StdinEof then begin if ms > 0 then SysUtils.Sleep(ms); exit end;
@@ -398,6 +399,7 @@ var
   h:THandle; avail,got,i:dword; deadline,now:qword; wait:dword;
   rec:array[0..15] of TInputRecord;
 begin
+  if ms > 0 then MdbFlush;           { nothing held back while FAND waits }
   PollStdinMs := false; if FandBatch then exit;
   if KeyBytes <> '' then begin PollStdinMs := true; exit end;
   if StdinEof then begin if ms > 0 then Sleep(ms); exit end;
