@@ -1,0 +1,646 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "PC FAND",
+  "scopeName": "source.fand",
+  "comment": "PC FAND chapters F E R M P D U I (one chapter per file, from fand --source-out). Keywords are case-insensitive; field types (A N F R D B T) are upper case as the compiler requires.",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#form"
+    },
+    {
+      "include": "#report-level"
+    },
+    {
+      "include": "#sections"
+    },
+    {
+      "include": "#code"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "include": "#directive"
+        },
+        {
+          "include": "#comment"
+        }
+      ]
+    },
+    "directive": {
+      "patterns": [
+        {
+          "name": "meta.preprocessor.include.fand",
+          "match": "(?i)(\\{\\$)\\s*(include)\\s+([^\\s}]*)\\s*(\\})",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.directive.begin.fand"
+            },
+            "2": {
+              "name": "keyword.control.directive.include.fand"
+            },
+            "3": {
+              "name": "string.unquoted.include.fand"
+            },
+            "4": {
+              "name": "punctuation.definition.directive.end.fand"
+            }
+          }
+        },
+        {
+          "name": "meta.preprocessor.fand",
+          "match": "(?i)(\\{\\$)\\s*(define|ifdef|ifndef|else|endif)\\b\\s*([^}]*?)\\s*(\\})",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.directive.begin.fand"
+            },
+            "2": {
+              "name": "keyword.control.directive.fand"
+            },
+            "3": {
+              "name": "entity.name.function.preprocessor.fand"
+            },
+            "4": {
+              "name": "punctuation.definition.directive.end.fand"
+            }
+          }
+        },
+        {
+          "name": "meta.preprocessor.fand",
+          "match": "(\\{\\$)([^}]*)(\\})",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.directive.begin.fand"
+            },
+            "2": {
+              "name": "invalid.illegal.directive.fand"
+            },
+            "3": {
+              "name": "punctuation.definition.directive.end.fand"
+            }
+          }
+        }
+      ]
+    },
+    "comment": {
+      "comment": "Comments nest: { a { b } c } is one comment. {$ inside a comment is plain text.",
+      "name": "comment.block.fand",
+      "begin": "\\{",
+      "end": "\\}",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.comment.begin.fand"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.comment.end.fand"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#comment"
+        }
+      ]
+    },
+    "string": {
+      "comment": "Apostrophes; '' is an apostrophe, \\nnn a character code, \\\\ a backslash.",
+      "name": "string.quoted.single.fand",
+      "begin": "'",
+      "end": "'(?!')",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.begin.fand"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.end.fand"
+        }
+      },
+      "patterns": [
+        {
+          "name": "constant.character.escape.fand",
+          "match": "''|\\\\\\\\|\\\\[0-9]{1,3}"
+        }
+      ]
+    },
+    "sections": {
+      "patterns": [
+        {
+          "comment": "F chapter paragraphs: #K keys, #C computed, #A additive, #U views, #D dependencies, #L checks, #I implicit values",
+          "match": "(?i)(#)([KCAUDLI])(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])",
+          "captures": {
+            "0": {
+              "name": "entity.name.section.paragraph.fand"
+            },
+            "1": {
+              "name": "punctuation.definition.section.fand"
+            }
+          }
+        },
+        {
+          "comment": "R and M inputs: #I_FILE, #I1_FILE",
+          "match": "(?i)(#)(I[1-9]?)(_)\\s*([A-Za-z_\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}][\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*)",
+          "captures": {
+            "0": {
+              "name": "entity.name.section.input.fand"
+            },
+            "1": {
+              "name": "punctuation.definition.section.fand"
+            },
+            "3": {
+              "name": "punctuation.separator.section.fand"
+            },
+            "4": {
+              "name": "variable.other.file.fand"
+            }
+          }
+        },
+        {
+          "comment": "M outputs to no file: #O_dummy, #O1_dummy, #O*_dummy",
+          "match": "(?i)(#)(O(?:[1-9]|\\*)?)(_)\\s*(dummy)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])",
+          "captures": {
+            "0": {
+              "name": "entity.name.section.output.fand"
+            },
+            "1": {
+              "name": "punctuation.definition.section.fand"
+            },
+            "3": {
+              "name": "punctuation.separator.section.fand"
+            },
+            "4": {
+              "name": "keyword.other.dummy.fand"
+            }
+          }
+        },
+        {
+          "comment": "M outputs: #O_FILE, #O1_FILE, #O*_FILE, optionally FILE+",
+          "match": "(?i)(#)(O(?:[1-9]|\\*)?)(_)\\s*([A-Za-z_\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}][\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*)(\\s*\\+)?",
+          "captures": {
+            "0": {
+              "name": "entity.name.section.output.fand"
+            },
+            "1": {
+              "name": "punctuation.definition.section.fand"
+            },
+            "3": {
+              "name": "punctuation.separator.section.fand"
+            },
+            "4": {
+              "name": "variable.other.file.fand"
+            },
+            "5": {
+              "name": "keyword.operator.append.fand"
+            }
+          }
+        },
+        {
+          "comment": "any other # is an error",
+          "match": "#",
+          "name": "invalid.illegal.section.fand"
+        }
+      ]
+    },
+    "report-level": {
+      "comment": "R output level: #RH #RF #PH #PF #DH #DE #DE2 #CH_Field #CF2_Field, its expression list up to \";\", then the text template up to the next \"#\"",
+      "name": "meta.report.level.fand",
+      "begin": "(?i)(#)(RH|RF|PH|PF|DH[1-9]?|DE[1-9]?|(?:CH|CF)[1-9]?(_)\\s*([A-Za-z_\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}][\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*))(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])",
+      "beginCaptures": {
+        "0": {
+          "name": "entity.name.section.report-level.fand"
+        },
+        "1": {
+          "name": "punctuation.definition.section.fand"
+        },
+        "3": {
+          "name": "punctuation.separator.section.fand"
+        },
+        "4": {
+          "name": "variable.other.field.fand"
+        }
+      },
+      "end": "(?=#)",
+      "patterns": [
+        {
+          "name": "meta.report.level.header.fand",
+          "begin": "\\G",
+          "end": ";|(?=#)",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.terminator.statement.fand"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#begin-end"
+            },
+            {
+              "include": "#code"
+            }
+          ]
+        },
+        {
+          "include": "#report-template"
+        }
+      ]
+    },
+    "begin-end": {
+      "comment": "begin ... end inside a report level header, so that its \";\" do not end the header",
+      "begin": "(?i)\\b(?:begin)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])",
+      "end": "(?i)\\b(?:end)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])",
+      "beginCaptures": {
+        "0": {
+          "name": "keyword.control.fand"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "keyword.control.fand"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#begin-end"
+        },
+        {
+          "include": "#code"
+        }
+      ]
+    },
+    "report-template": {
+      "patterns": [
+        {
+          "include": "#comments"
+        },
+        {
+          "name": "constant.other.placeholder.mask.fand",
+          "match": "_+(?:[.,:]_+)*|@+(?:[.,:]@+)*"
+        },
+        {
+          "name": "constant.character.escape.pagebreak.fand",
+          "match": "\\\\"
+        },
+        {
+          "include": "#style"
+        },
+        {
+          "name": "string.unquoted.template.fand",
+          "match": "[^_@{\\\\#\\x{01}-\\x{08}\\x{0B}\\x{0C}\\x{0E}-\\x{1F}]+"
+        }
+      ]
+    },
+    "form": {
+      "comment": "E chapter: #_FILE field list \";\" then the screen template to the end of the chapter",
+      "name": "meta.form.fand",
+      "begin": "(#)(_)\\s*([A-Za-z_\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}][\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*)",
+      "beginCaptures": {
+        "0": {
+          "name": "entity.name.section.form.fand"
+        },
+        "1": {
+          "name": "punctuation.definition.section.fand"
+        },
+        "2": {
+          "name": "punctuation.separator.section.fand"
+        },
+        "3": {
+          "name": "variable.other.file.fand"
+        }
+      },
+      "end": "(?!)",
+      "patterns": [
+        {
+          "name": "meta.form.fields.fand",
+          "begin": "\\G",
+          "end": ";",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.terminator.statement.fand"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#code"
+            }
+          ]
+        },
+        {
+          "patterns": [
+            {
+              "include": "#comments"
+            },
+            {
+              "name": "constant.other.placeholder.mask.fand",
+              "match": "_+"
+            },
+            {
+              "name": "constant.character.escape.pagebreak.fand",
+              "match": "\\\\"
+            },
+            {
+              "include": "#style"
+            },
+            {
+              "name": "string.unquoted.template.fand",
+              "match": "[^_{\\\\\\x{01}-\\x{08}\\x{0B}\\x{0C}\\x{0E}-\\x{1F}]+"
+            }
+          ]
+        }
+      ]
+    },
+    "code": {
+      "patterns": [
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#field-type"
+        },
+        {
+          "include": "#option"
+        },
+        {
+          "include": "#number"
+        },
+        {
+          "include": "#dotted"
+        },
+        {
+          "include": "#function-declaration"
+        },
+        {
+          "include": "#keywords"
+        },
+        {
+          "include": "#object"
+        },
+        {
+          "include": "#style"
+        },
+        {
+          "include": "#frame"
+        },
+        {
+          "include": "#identifier"
+        },
+        {
+          "include": "#operators"
+        },
+        {
+          "include": "#punctuation"
+        }
+      ]
+    },
+    "field-type": {
+      "comment": "Field types after \":\" in F chapters (Name:A,30; #C X:=expr : F,9.2;) and in prompt(): A,n[R|L][!] A,'mask' N,n[L] F,n.m F,n,m R D[,'mask'] B T[,n][!]",
+      "match": "(:)\\s*(F\\s*,\\s*[0-9]+\\s*[.,]\\s*[0-9]+|[AN]\\s*,\\s*[0-9]+(?:\\s*[RL](?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]))?|A\\s*,\\s*('(?:[^']|'')*')|D(?:\\s*,\\s*('(?:[^']|'')*'))?|T(?:\\s*,\\s*[0-9]+)?|[RB])(\\s*!)?(?=\\s*(?:[;)}{]|$))",
+      "captures": {
+        "1": {
+          "name": "punctuation.separator.type.fand"
+        },
+        "2": {
+          "name": "entity.name.type.field.fand"
+        },
+        "3": {
+          "name": "string.quoted.single.mask.fand"
+        },
+        "4": {
+          "name": "string.quoted.single.mask.fand"
+        },
+        "5": {
+          "name": "keyword.operator.flag.fand"
+        }
+      }
+    },
+    "option": {
+      "comment": "name=value options of edit, report, edittxt, graph, ... (after \"(\" or \",\" or at the start of a line)",
+      "match": "(?i)(?:(?<=[,(])|^)\\s*(saveafter|journal|palette|refresh|assign|colblk|errmsg|grpoly|indent|overwr|reckey|txtpos|txtwin|align|delim|field|headx|heady|headz|nrecs|owner|print|recno|right|shift|style|times|txtxy|watch|width|cond|ctrl|dirx|dupl|exit|fill|foot|grid|head|help|irec|last|left|mode|noed|sort|type|wrap|alt|max|min|rgb|sel|sum|tab|txt|gf|ww|u)(?=\\s*=(?![=>]))",
+      "captures": {
+        "1": {
+          "name": "variable.parameter.option.fand"
+        }
+      }
+    },
+    "number": {
+      "comment": "Integers, reals (1.5, 2e-3), dates (1.1.2020, 12.7.95) and times (12:30, 12:30:15.50)",
+      "name": "constant.numeric.fand",
+      "match": "\\b[0-9]+(?:[.:][0-9]+)*(?:[eE]-?[0-9]+)?"
+    },
+    "dotted": {
+      "patterns": [
+        {
+          "comment": "Report specials: .pagesize:= .pagelimit:= .page:= .line:= .line<= .notatend .notsolo",
+          "match": "(?<![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}\\])])(\\.)\\s*((?i:pagelimit|notatend|pagesize|notsolo|line|page))(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])",
+          "captures": {
+            "1": {
+              "name": "punctuation.accessor.fand"
+            },
+            "2": {
+              "name": "keyword.other.report.fand"
+            }
+          }
+        },
+        {
+          "comment": "FILE.nrecs, LINK.exist, I1.count, ...",
+          "match": "(?<=[\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}\\]])(\\.)((?i:generation|lastupdate|errortext|archives|nrecsabs|warning|volume|count|error|exist|nrecs|path))(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])",
+          "captures": {
+            "1": {
+              "name": "punctuation.accessor.fand"
+            },
+            "2": {
+              "name": "support.variable.property.fand"
+            }
+          }
+        },
+        {
+          "comment": "FILE.Field, I1.Field, O.Field, recvar.Field",
+          "match": "(?<=[\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}\\]])(\\.)([A-Za-z_\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}][\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*)",
+          "captures": {
+            "1": {
+              "name": "punctuation.accessor.fand"
+            },
+            "2": {
+              "name": "variable.other.member.fand"
+            }
+          }
+        }
+      ]
+    },
+    "function-declaration": {
+      "match": "(?i)\\b(function)\\s+([A-Za-z_\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}][\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*)",
+      "captures": {
+        "1": {
+          "name": "storage.type.function.fand"
+        },
+        "2": {
+          "name": "entity.name.function.fand"
+        }
+      }
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.fand",
+          "match": "(?i)\\b(?:menuloop|pulldown|menubar|cancel|escape|forall|repeat|begin|break|until|while|case|else|exit|menu|quit|then|with|end|for|do|if|of|to)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])"
+        },
+        {
+          "name": "storage.type.var.fand",
+          "match": "(?i)\\b(?:var)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])"
+        },
+        {
+          "name": "storage.type.fand",
+          "match": "(?i)\\b(?:boolean|record|string|index|file|real)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])"
+        },
+        {
+          "name": "constant.language.boolean.fand",
+          "match": "(?i)\\b(?:false|true)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])"
+        },
+        {
+          "name": "keyword.operator.word.fand",
+          "match": "(?i)\\b(?:round|div|mod|in)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])"
+        },
+        {
+          "name": "keyword.other.statement.fand",
+          "match": "(?i)\\b(?:releasedrive|resetcatalog|clearkeybuf|setedittxt|setprinter|appendrec|checkfile|deleterec|floodfill|indexfile|outtextxy|randomize|recallrec|rectangle|setkeybuf|copyfile|getindex|headline|printtxt|putpixel|restorem|setmouse|sqlrdtxt|sqlwrtxt|writerec|backupm|display|edittxt|ellipse|linkrec|memdiag|message|nosound|portout|readrec|restore|turncat|writeln|backup|clreol|clrscr|gotoxy|puttxt|report|close|delay|graph|login|lproc|merge|mount|sound|write|beep|call|edit|exec|help|proc|save|sort|wait|sql)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])"
+        },
+        {
+          "name": "keyword.other.fand",
+          "match": "(?i)\\b(?:journalof|graphics|locked|newrec|shared|window|dummy|owner|like|key)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])"
+        },
+        {
+          "name": "keyword.other.option.fand",
+          "match": "(?i)\\b(?:compressed|nocompress|overwrite|printctrl|compress|errcheck|interact|loadfont|nocancel|textmode|freemem|onlysum|append|noedit|normal|subdir|check)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])"
+        },
+        {
+          "name": "support.function.fand",
+          "match": "(?i)\\b(?:mouseevent|isdeleted|repeatstr|selectstr|trailchar|addmonth|addwdays|copyline|difmonth|difwdays|diskfree|filesize|leadchar|promptyn|recnoabs|recnolog|equmask|getpath|ismouse|linecnt|lowcase|mousein|nodiakr|replace|strdate|typeday|valdate|arctan|getenv|gettxt|inttsr|length|modulo|portin|prompt|upcase|color|dtext|evalb|evalr|evals|keyof|owned|recno|trust|char|cond|copy|date|frac|link|sqrt|text|abs|cos|exp|int|ord|pos|sin|sql|sqr|str|sum|val|ln)(?=\\s*\\()"
+        },
+        {
+          "name": "support.function.fand",
+          "match": "(?i)\\b(?:keypressed|edupdated|escprompt|pagelimit|accright|cprinter|currtime|edreckey|exitcode|isnewrec|memavail|password|testmode|usercode|username|edbreak|edfield|edrecno|getmaxx|getmaxy|getpath|readkey|version|clipbd|edbool|edfile|edirec|keybuf|maxcol|maxrow|mousex|mousey|random|txtpos|edkey|group|menux|menuy|today|txtxy|line|page|pi)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])"
+        },
+        {
+          "name": "variable.language.fand",
+          "match": "(?i)\\b(?:randseed|catalog|edok)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])"
+        },
+        {
+          "comment": "lock modes in with shared FILE(Wr) ... and with locked",
+          "name": "constant.language.lockmode.fand",
+          "match": "(?i)(?<=\\()\\s*(?:noexcl|nodel|excl|nocr|null|del|cr|rd|wr)(?=\\s*\\))"
+        },
+        {
+          "comment": "key names in exit=( F2,CtrlF5 : ... )",
+          "name": "constant.language.key.fand",
+          "match": "(?i)\\b(?:ctrl(?:left|right|end|pgdn|home|pgup|n|y|p)|(?:shift|ctrl|alt)?f(?:10|[1-9])|shifttab|pgdn|pgup|esc)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])"
+        }
+      ]
+    },
+    "object": {
+      "comment": "the FILE in FILE.Field and FILE[n].Field (after the keywords, so that \"in [\" stays an operator)",
+      "match": "\\b[A-Za-z_\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}][\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*(?=\\.[A-Za-z_\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]|\\s*\\[)",
+      "name": "variable.other.object.fand"
+    },
+    "style": {
+      "comment": "control characters that switch colour or style in templates and E chapter headings",
+      "match": "[\\x{01}-\\x{08}\\x{0B}\\x{0C}\\x{0E}-\\x{1F}]+",
+      "name": "constant.character.style.fand"
+    },
+    "frame": {
+      "comment": "box-drawing and block characters outside a template (the heading lines of an E chapter)",
+      "match": "[\\x{2500}-\\x{25A0}]+",
+      "name": "string.unquoted.template.fand"
+    },
+    "identifier": {
+      "name": "variable.other.fand",
+      "match": "[A-Za-z_\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}][\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*"
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.assignment.fand",
+          "match": ":="
+        },
+        {
+          "name": "keyword.operator.assignment.compound.fand",
+          "match": "\\+="
+        },
+        {
+          "name": "keyword.operator.logical.fand",
+          "match": "<=>|=>"
+        },
+        {
+          "comment": "with an optional precision (=.2) or lexical (=~) suffix",
+          "name": "keyword.operator.comparison.fand",
+          "match": "(?:<>|<=|>=|=|<|>)(?:\\.[0-9]+|~)?"
+        },
+        {
+          "name": "keyword.operator.logical.fand",
+          "match": "[\\^&|]"
+        },
+        {
+          "name": "keyword.operator.range.fand",
+          "match": "\\.\\."
+        },
+        {
+          "name": "keyword.operator.arithmetic.fand",
+          "match": "[-+*/]"
+        },
+        {
+          "comment": "~ lexical ordering, ! !! ? % flags",
+          "name": "keyword.operator.fand",
+          "match": "!!?|[~?%]"
+        },
+        {
+          "comment": "@ own key, @@ parametric file key",
+          "name": "keyword.other.key.fand",
+          "match": "@@?"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.terminator.statement.fand",
+          "match": ";"
+        },
+        {
+          "name": "punctuation.separator.comma.fand",
+          "match": ","
+        },
+        {
+          "name": "punctuation.separator.colon.fand",
+          "match": ":"
+        },
+        {
+          "name": "punctuation.accessor.fand",
+          "match": "\\."
+        },
+        {
+          "name": "punctuation.section.parens.begin.fand",
+          "match": "\\("
+        },
+        {
+          "name": "punctuation.section.parens.end.fand",
+          "match": "\\)"
+        },
+        {
+          "name": "punctuation.section.brackets.begin.fand",
+          "match": "\\["
+        },
+        {
+          "name": "punctuation.section.brackets.end.fand",
+          "match": "\\]"
+        }
+      ]
+    }
+  }
+}
