@@ -83,6 +83,8 @@ Chapters are files NNN-T-Name.txt (order, type, name), UTF-8 with LF;
 the RDB keeps CP852 with CR LF. --source-in compiles what it stored and
 reports the first error by chapter, line and column. A task whose chapters
 are password-protected is refused both ways.
+tools/vscode-fand highlights these files in Visual Studio Code (see its
+README.md).
 
 
 Extending the runtime for a task

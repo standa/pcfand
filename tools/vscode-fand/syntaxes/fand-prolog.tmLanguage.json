@@ -1,0 +1,458 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "PC FAND Prolog",
+  "scopeName": "source.fand-prolog",
+  "comment": "PC FAND L chapters (Turbo-Prolog-like). Identifiers are case-sensitive: upper case or _ starts a variable or a type.",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#domains"
+    },
+    {
+      "include": "#constants"
+    },
+    {
+      "include": "#database"
+    },
+    {
+      "include": "#predicates"
+    },
+    {
+      "include": "#clauses"
+    },
+    {
+      "include": "#clause-body"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "include": "#directive"
+        },
+        {
+          "include": "#comment"
+        }
+      ]
+    },
+    "directive": {
+      "patterns": [
+        {
+          "name": "meta.preprocessor.include.fand-prolog",
+          "match": "(?i)(\\{\\$)\\s*(include)\\s+([^\\s}]*)\\s*(\\})",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.directive.begin.fand-prolog"
+            },
+            "2": {
+              "name": "keyword.control.directive.include.fand-prolog"
+            },
+            "3": {
+              "name": "string.unquoted.include.fand-prolog"
+            },
+            "4": {
+              "name": "punctuation.definition.directive.end.fand-prolog"
+            }
+          }
+        },
+        {
+          "name": "meta.preprocessor.fand-prolog",
+          "match": "(?i)(\\{\\$)\\s*(define|ifdef|ifndef|else|endif)\\b\\s*([^}]*?)\\s*(\\})",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.directive.begin.fand-prolog"
+            },
+            "2": {
+              "name": "keyword.control.directive.fand-prolog"
+            },
+            "3": {
+              "name": "entity.name.function.preprocessor.fand-prolog"
+            },
+            "4": {
+              "name": "punctuation.definition.directive.end.fand-prolog"
+            }
+          }
+        },
+        {
+          "name": "meta.preprocessor.fand-prolog",
+          "match": "(\\{\\$)([^}]*)(\\})",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.directive.begin.fand-prolog"
+            },
+            "2": {
+              "name": "invalid.illegal.directive.fand-prolog"
+            },
+            "3": {
+              "name": "punctuation.definition.directive.end.fand-prolog"
+            }
+          }
+        }
+      ]
+    },
+    "comment": {
+      "comment": "Comments nest: { a { b } c } is one comment. {$ inside a comment is plain text.",
+      "name": "comment.block.fand-prolog",
+      "begin": "\\{",
+      "end": "\\}",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.comment.begin.fand-prolog"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.comment.end.fand-prolog"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#comment"
+        }
+      ]
+    },
+    "string": {
+      "comment": "Apostrophes; '' is an apostrophe, \\nnn a character code, \\\\ a backslash.",
+      "name": "string.quoted.single.fand-prolog",
+      "begin": "'",
+      "end": "'(?!')",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.begin.fand-prolog"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.end.fand-prolog"
+        }
+      },
+      "patterns": [
+        {
+          "name": "constant.character.escape.fand-prolog",
+          "match": "''|\\\\\\\\|\\\\[0-9]{1,3}"
+        }
+      ]
+    },
+    "domains": {
+      "name": "meta.section.domains.fand-prolog",
+      "begin": "(?i)(#)(DOMAINS)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])",
+      "beginCaptures": {
+        "0": {
+          "name": "entity.name.section.fand-prolog"
+        },
+        "1": {
+          "name": "punctuation.definition.section.fand-prolog"
+        }
+      },
+      "end": "(?=#)",
+      "patterns": [
+        {
+          "include": "#declaration"
+        }
+      ]
+    },
+    "constants": {
+      "name": "meta.section.constants.fand-prolog",
+      "begin": "(?i)(#)(CONSTANTS)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])",
+      "beginCaptures": {
+        "0": {
+          "name": "entity.name.section.fand-prolog"
+        },
+        "1": {
+          "name": "punctuation.definition.section.fand-prolog"
+        }
+      },
+      "end": "(?=#)",
+      "patterns": [
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#number"
+        },
+        {
+          "include": "#types"
+        },
+        {
+          "match": "\\b[\\p{Lu}_][\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*",
+          "name": "entity.name.type.fand-prolog"
+        },
+        {
+          "match": "\\b\\p{Ll}[\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*(?=\\s*=)",
+          "name": "variable.other.constant.fand-prolog"
+        },
+        {
+          "include": "#clause-body"
+        }
+      ]
+    },
+    "database": {
+      "name": "meta.section.database.fand-prolog",
+      "begin": "(?i)(#)(DATABASE)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])(?:\\s*(-)\\s*([A-Za-z_\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}][\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*))?",
+      "beginCaptures": {
+        "0": {
+          "name": "entity.name.section.fand-prolog"
+        },
+        "1": {
+          "name": "punctuation.definition.section.fand-prolog"
+        },
+        "3": {
+          "name": "punctuation.separator.fand-prolog"
+        },
+        "4": {
+          "name": "variable.other.database.fand-prolog"
+        }
+      },
+      "end": "(?=#)",
+      "patterns": [
+        {
+          "include": "#declaration"
+        }
+      ]
+    },
+    "predicates": {
+      "name": "meta.section.predicates.fand-prolog",
+      "begin": "(?i)(#)(PREDICATES)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])",
+      "beginCaptures": {
+        "0": {
+          "name": "entity.name.section.fand-prolog"
+        },
+        "1": {
+          "name": "punctuation.definition.section.fand-prolog"
+        }
+      },
+      "end": "(?=#)",
+      "patterns": [
+        {
+          "include": "#declaration"
+        }
+      ]
+    },
+    "clauses": {
+      "name": "meta.section.clauses.fand-prolog",
+      "begin": "(?i)(#)(CLAUSES)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])",
+      "beginCaptures": {
+        "0": {
+          "name": "entity.name.section.fand-prolog"
+        },
+        "1": {
+          "name": "punctuation.definition.section.fand-prolog"
+        }
+      },
+      "end": "(?=#)",
+      "patterns": [
+        {
+          "include": "#clause-body"
+        }
+      ]
+    },
+    "declaration": {
+      "comment": "DOMAINS, DATABASE and PREDICATES: upper case names are types, lower case names predicates or functors; @name(Field/Type) is a view of a FAND file, @name['...'] a FAND procedure",
+      "patterns": [
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#number"
+        },
+        {
+          "match": "(@)\\s*([A-Za-z_\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}][\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.other.fand-file.fand-prolog"
+            },
+            "2": {
+              "name": "entity.name.function.fand-prolog"
+            }
+          }
+        },
+        {
+          "match": "([A-Za-z_\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}][\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*)\\s*(/)\\s*([A-Za-z_\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}][\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*)",
+          "captures": {
+            "1": {
+              "name": "variable.other.field.fand-prolog"
+            },
+            "2": {
+              "name": "punctuation.separator.fand-prolog"
+            },
+            "3": {
+              "name": "entity.name.type.fand-prolog"
+            }
+          }
+        },
+        {
+          "include": "#types"
+        },
+        {
+          "match": "\\b[\\p{Lu}_][\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*",
+          "name": "entity.name.type.fand-prolog"
+        },
+        {
+          "match": "\\b\\p{Ll}[\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*",
+          "name": "entity.name.function.fand-prolog"
+        },
+        {
+          "match": "&",
+          "name": "keyword.operator.output.fand-prolog"
+        },
+        {
+          "match": "=",
+          "name": "keyword.operator.definition.fand-prolog"
+        },
+        {
+          "match": ";",
+          "name": "punctuation.separator.alternative.fand-prolog"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.comma.fand-prolog"
+        },
+        {
+          "match": "[()]",
+          "name": "punctuation.section.parens.fand-prolog"
+        },
+        {
+          "match": "[\\[\\]]",
+          "name": "punctuation.section.brackets.fand-prolog"
+        }
+      ]
+    },
+    "clause-body": {
+      "patterns": [
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#number"
+        },
+        {
+          "match": "!",
+          "name": "keyword.control.cut.fand-prolog"
+        },
+        {
+          "match": ":-",
+          "name": "keyword.operator.definition.fand-prolog"
+        },
+        {
+          "match": "\\b(?:error|trace|call|fail|self|wait|not)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])",
+          "name": "keyword.control.fand-prolog"
+        },
+        {
+          "match": "\\b(?:inter|minus|union|add|all|del|inv|len|mem)_[\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*",
+          "name": "support.function.list.fand-prolog"
+        },
+        {
+          "match": "\\b(?:fandlinkfield|fandkeyfield|fandfield|fandfile|fandlink|consult|fandkey|loadlex|nextlex|retract|writeln|abbrev|assert|concat|getlex|write|save)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])",
+          "name": "support.function.fand-prolog"
+        },
+        {
+          "match": "\\b(?:repeatstr|trailchar|leadchar|length|maxcol|maxrow|copy|max|min|pos|str|val)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])(?=\\s*\\()",
+          "name": "support.function.fand-prolog"
+        },
+        {
+          "match": "\\b(?:maxcol|maxrow)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])",
+          "name": "support.function.fand-prolog"
+        },
+        {
+          "match": "\\b(?:false|true)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])",
+          "name": "constant.language.boolean.fand-prolog"
+        },
+        {
+          "include": "#types"
+        },
+        {
+          "match": "\\b_(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])",
+          "name": "variable.language.anonymous.fand-prolog"
+        },
+        {
+          "match": "\\b[\\p{Lu}_][\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*",
+          "name": "variable.other.fand-prolog"
+        },
+        {
+          "comment": "clause head at the start of a line",
+          "match": "^\\p{Ll}[\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*",
+          "name": "entity.name.function.fand-prolog"
+        },
+        {
+          "match": "\\b\\p{Ll}[\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*(?=\\s*\\()",
+          "name": "entity.name.function.call.fand-prolog"
+        },
+        {
+          "match": "\\b\\p{Ll}[\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]*",
+          "name": "constant.other.atom.fand-prolog"
+        },
+        {
+          "match": "\\|\\||&&|\\^",
+          "name": "keyword.operator.bitwise.fand-prolog"
+        },
+        {
+          "match": "<>|<=|>=|=|<|>",
+          "name": "keyword.operator.comparison.fand-prolog"
+        },
+        {
+          "match": "\\+=",
+          "name": "keyword.operator.assignment.fand-prolog"
+        },
+        {
+          "match": "[-+*/]",
+          "name": "keyword.operator.arithmetic.fand-prolog"
+        },
+        {
+          "match": "\\|",
+          "name": "keyword.operator.list.fand-prolog"
+        },
+        {
+          "match": "&",
+          "name": "keyword.operator.output.fand-prolog"
+        },
+        {
+          "match": "@",
+          "name": "keyword.other.fand-file.fand-prolog"
+        },
+        {
+          "match": "\\.",
+          "name": "punctuation.terminator.clause.fand-prolog"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.comma.fand-prolog"
+        },
+        {
+          "match": ":",
+          "name": "punctuation.separator.colon.fand-prolog"
+        },
+        {
+          "match": ";",
+          "name": "punctuation.separator.fand-prolog"
+        },
+        {
+          "match": "[()]",
+          "name": "punctuation.section.parens.fand-prolog"
+        },
+        {
+          "match": "[\\[\\]]",
+          "name": "punctuation.section.brackets.fand-prolog"
+        }
+      ]
+    },
+    "types": {
+      "match": "\\b(?:LongString|Boolean|Integer|String|Real|L_[\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}]+)(?![\\w\\x{80}-\\x{24FF}\\x{25A1}-\\x{10FFFF}])",
+      "name": "storage.type.fand-prolog"
+    },
+    "number": {
+      "name": "constant.numeric.fand-prolog",
+      "match": "\\$[0-9A-Fa-f]+|\\b[0-9]+(?:\\.[0-9]+)?(?:[eE]-?[0-9]+)?"
+    }
+  }
+}

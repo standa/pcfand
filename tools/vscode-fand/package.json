@@ -1,0 +1,57 @@
+{
+  "name": "pcfand-fand",
+  "displayName": "PC FAND",
+  "description": "Syntax highlighting for PC FAND chapter sources (the NNN-T-Name.txt files of fand --source-out).",
+  "version": "0.1.0",
+  "publisher": "pcfand",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "fand",
+        "aliases": [
+          "PC FAND",
+          "fand"
+        ],
+        "extensions": [
+          ".fand"
+        ],
+        "filenamePatterns": [
+          "[0-9][0-9][0-9]-[FERMPDUIfermpdui]-*.txt",
+          "[0-9][0-9][0-9][0-9]-[FERMPDUIfermpdui]-*.txt"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "fand-prolog",
+        "aliases": [
+          "PC FAND Prolog",
+          "fand-prolog"
+        ],
+        "filenamePatterns": [
+          "[0-9][0-9][0-9]-[Ll]-*.txt",
+          "[0-9][0-9][0-9][0-9]-[Ll]-*.txt"
+        ],
+        "configuration": "./language-configuration-prolog.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "fand",
+        "scopeName": "source.fand",
+        "path": "./syntaxes/fand.tmLanguage.json"
+      },
+      {
+        "language": "fand-prolog",
+        "scopeName": "source.fand-prolog",
+        "path": "./syntaxes/fand-prolog.tmLanguage.json"
+      }
+    ]
+  }
+}
