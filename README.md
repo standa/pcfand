@@ -26,6 +26,18 @@ Z důvodu úpravy práce s HEAPem (shora a zezdola stack, uprostřed heap), vyu�
 
 * V adresáři `/PAS/Mb160` je nezveřejněná úprava, která zvyšuje limit fyzické velikosti sdíleného datového souboru `.000` nad 160 MB.
 
+## Port do Free Pascalu
+
+Větev `fpc-migration` obsahuje port PC FANDu do Free Pascalu pro 64bitový
+macOS, Linux a Windows. Překlad, spuštění úlohy a rozšíření runtime o
+pomocné programy konkrétní úlohy popisuje `HOWTO.txt` (anglicky).
+
+Ukázkové úlohy `examples/hello` (menu Hello > World a About) a
+`examples/invoices` (malá fakturace se všemi typy kapitol) jsou uloženy
+jako zdrojové texty kapitol, `tools/build.sh` z nich sestaví RDB. Bez
+uživatelského rozhraní umí `fand` úlohu sestavit ze zdrojových textů
+(`--source-in`) a zapsat je zpět (`--source-out`).
+
 ## Licence
 
 PC FAND je uvolněn pod MIT licencí.
